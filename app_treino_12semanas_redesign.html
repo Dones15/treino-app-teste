@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meu treino</title>
+<style>
+  :root {
+    --bg: #f3f6f8;
+    --bg-soft: #eef2f5;
+    --surface: #ffffff;
+    --surface-2: #f8fafb;
+    --text: #142129;
+    --muted: #62707c;
+    --line: #dce5ea;
+    --line-strong: #c8d5dd;
+    --primary: #0f766e;
+    --primary-strong: #0b5d57;
+    --primary-soft: #e4f4f2;
+    --success-soft: #e7f7ef;
+    --shadow: 0 12px 32px rgba(14, 30, 37, 0.08);
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+  body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(180deg, #f7fafb 0%, #eef3f5 100%);
+    color: var(--text);
+  }
+
+  .app {
+    max-width: 430px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 18px 16px 96px;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
+    color: #fff;
+    border-radius: 28px;
+    padding: 22px 20px 18px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+
+  .header-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.14);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .header h1 {
+    margin-top: 12px;
+    font-size: 28px;
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .header p {
+    margin-top: 6px;
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(220,229,234,0.9);
+    border-radius: 18px;
+    padding: 6px;
+    position: sticky;
+    top: 10px;
+    z-index: 20;
+    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+    margin-bottom: 14px;
+  }
+
+  .tab {
+    border: none;
+    background: transparent;
+    border-radius: 14px;
+    padding: 11px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: 0.18s ease;
+  }
+
+  .tab.active {
+    background: var(--surface);
+    color: var(--primary);
+    box-shadow: 0 4px 14px rgba(15, 118, 110, 0.12);
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .card,
+  .metric-card,
+  .history-item,
+  .exercise-row,
+  .ficha-card,
+  .modal,
+  .conquista-box,
+  .empty-state,
+  .panel {
+    background: rgba(255,255,255,0.94);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 18px 0 10px;
+    padding-left: 2px;
+  }
+
+  .escolha-header,
+  .screen-title {
+    margin-bottom: 12px;
+  }
+
+  .escolha-header h2,
+  .screen-title h2 {
+    font-size: 24px;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 4px;
+  }
+
+  .escolha-header p,
+  .screen-title p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .ciclo-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbfc 100%);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+
+  .ciclo-label {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .ciclo-dots {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .ciclo-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface-2);
+  }
+
+  .ciclo-dot.done {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(15,118,110,0.12);
+  }
+
+  .ciclo-completo-banner {
+    background: linear-gradient(180deg, #f1fbf8 0%, #e5f7ef 100%);
+    border: 1px solid #c7e9d7;
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+
+  .ciclo-completo-banner p {
+    font-size: 14px;
+    font-weight: 700;
+    color: #115e59;
+  }
+
+  .ciclo-completo-banner span {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #3f6b61;
+  }
+
+  .ficha-btn {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdfe 100%);
+    border-radius: 22px;
+    padding: 16px;
+    margin-bottom: 10px;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .ficha-btn:hover:not([disabled]) {
+    transform: translateY(-1px);
+    border-color: #b7d7d2;
+  }
+
+  .ficha-btn[disabled] {
+    opacity: 0.52;
+    cursor: not-allowed;
+  }
+
+  .ficha-btn[disabled]::after {
+    content: 'feito neste ciclo';
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    padding: 4px 8px;
+    border-radius: 999px;
+  }
+
+  .ficha-top,
+  .ficha-card-top,
+  .program-row,
+  .treino-topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .ficha-badge,
+  .mini-badge,
+  .hero-badge,
+  .conquista-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+
+  .mini-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    font-size: 11px;
+  }
+
+  .hero-badge,
+  .conquista-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.16);
+    color: #fff;
+    font-size: 16px;
+  }
+
+  .conquista-badge {
+    background: var(--primary-soft);
+    color: var(--primary);
+    margin: 0 auto 14px;
+  }
+
+  .ficha-text,
+  .program-row-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .fb-nome,
+  .history-title,
+  .exercise-name,
+  .program-row-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.25;
+  }
+
+  .fb-info,
+  .program-row-sub,
+  .history-date,
+  .exercise-meta,
+  .subtle-text {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .done-tag,
+  .status-pill,
+  .ghost-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .done-tag,
+  .status-pill.ok {
+    background: #e8f6ef;
+    color: #166534;
+    border: 1px solid #c7e9d7;
+  }
+
+  .ghost-pill {
+    background: #f4f7f9;
+    color: var(--muted);
+    border: 1px solid var(--line);
+  }
+
+  .prog-hero {
+    background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
+    border-radius: 28px;
+    padding: 20px;
+    color: #fff;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+
+  .prog-hero-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.72);
+    font-weight: 700;
+  }
+
+  .prog-hero-title {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.05;
+    margin-top: 10px;
+    letter-spacing: -0.03em;
+  }
+
+  .prog-hero-sub {
+    font-size: 13px;
+    margin-top: 6px;
+    color: rgba(255,255,255,0.8);
+  }
+
+  .prog-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .prog-stat {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 10px;
+  }
+
+  .prog-stat-val {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .prog-stat-label {
+    margin-top: 4px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.72);
+    line-height: 1.3;
+  }
+
+  .prog-bar-wrap,
+  .panel {
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+
+  .prog-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .prog-bar-label,
+  .prog-bar-pct {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .prog-bar-pct { color: var(--primary); }
+
+  .prog-bar-track {
+    height: 10px;
+    background: #e7eef2;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .prog-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0f766e 0%, #14b8a6 100%);
+    border-radius: 999px;
+    transition: width 0.5s ease;
+  }
+
+  .semanas-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+
+  .semana-box {
+    aspect-ratio: 1;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    background: var(--surface);
+    box-shadow: 0 6px 18px rgba(14, 30, 37, 0.05);
+    cursor: pointer;
+  }
+
+  .semana-box.completa {
+    background: linear-gradient(180deg, #0f766e 0%, #115e59 100%);
+    border-color: #0f766e;
+    color: #fff;
+  }
+
+  .semana-box.atual {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border-color: #b7d7d2;
+  }
+
+  .semana-box.futura {
+    opacity: 0.42;
+    cursor: default;
+  }
+
+  .program-row {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .program-row:last-child { border-bottom: none; }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: rgba(255,255,255,0.94);
+    border: 1px solid var(--line);
+    padding: 10px 14px;
+    border-radius: 999px;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+  }
+
+  .treino-head {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .group-sep {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 16px 0 8px;
+    padding-left: 10px;
+    border-left: 3px solid #9bc9c4;
+  }
+
+  .exercise-row {
+    padding: 14px;
+    margin-bottom: 8px;
+  }
+
+  .pr-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    background: #fff4d6;
+    border: 1px solid #f1dd9b;
+    color: #7c5b00;
+    white-space: nowrap;
+  }
+
+  .weight-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .set-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .set-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .set-input {
+    width: 60px;
+    padding: 10px 6px;
+    border-radius: 12px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface-2);
+    font-size: 13px;
+    text-align: center;
+    color: var(--text);
+  }
+
+  .set-input:focus {
+    outline: none;
+    border-color: #87bdb6;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(15,118,110,0.08);
+  }
+
+  .save-btn,
+  .modal-btn,
+  .conquista-btn {
+    width: 100%;
+    border: none;
+    border-radius: 16px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(15,118,110,0.24);
+  }
+
+  .modal-btn-sec {
+    width: 100%;
+    padding: 12px 14px;
+    margin-top: 8px;
+    background: #f7fafb;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .metric-card {
+    padding: 14px 16px;
+  }
+
+  .metric-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  .metric-value {
+    margin-top: 6px;
+    font-size: 26px;
+    line-height: 1;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .history-item,
+  .ficha-card,
+  .empty-state {
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+
+  .history-exs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+    margin-top: 10px;
+  }
+
+  .history-ex {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .history-ex span {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 28px 18px;
+  }
+
+  .empty-state h3 {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .empty-state p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .modal-overlay,
+  .conquista {
+    position: fixed;
+    inset: 0;
+    background: rgba(9, 18, 26, 0.48);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+    padding: 20px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .modal,
+  .conquista-box {
+    width: 100%;
+    max-width: 360px;
+    padding: 24px;
+  }
+
+  .modal h2,
+  .conquista-titulo {
+    font-size: 24px;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 10px;
+  }
+
+  .modal p,
+  .conquista-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .conquista-box {
+    text-align: center;
+  }
+
+  .hidden { display: none !important; }
+
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    background: rgba(20, 33, 41, 0.96);
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+    z-index: 80;
+    white-space: nowrap;
+    box-shadow: 0 10px 22px rgba(9,18,26,0.2);
+  }
+
+  @media (max-width: 380px) {
+    .app { padding-left: 12px; padding-right: 12px; }
+    .header h1 { font-size: 26px; }
+    .prog-hero-title { font-size: 22px; }
+    .fb-nome, .history-title, .exercise-name, .program-row-title { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-kicker">Treino semanal</div>
+    <h1>Meu treino</h1>
+    <p id="header-date"></p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showScreen('escolha')">Hoje</button>
+    <button class="tab" onclick="showScreen('programa')">Programa</button>
+    <button class="tab" onclick="showScreen('ficha')">Fichas</button>
+    <button class="tab" onclick="showScreen('historico')">Histórico</button>
+  </div>
+
+  <div id="screen-escolha" class="screen active"></div>
+  <div id="screen-treino" class="screen"></div>
+  <div id="screen-programa" class="screen"></div>
+  <div id="screen-ficha" class="screen"></div>
+  <div id="screen-historico" class="screen"></div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-inicio">
+  <div class="modal">
+    <div class="conquista-badge">12W</div>
+    <h2>Iniciar programa</h2>
+    <p>Você vai começar um ciclo de 12 semanas. O objetivo é concluir as 5 fichas ao menos uma vez por semana e acompanhar a evolução ao longo do processo.</p>
+    <p style="margin-top:10px">A data de início será registrada hoje.</p>
+    <button class="modal-btn" onclick="iniciarPrograma()">Começar programa</button>
+    <button class="modal-btn-sec" onclick="document.getElementById('modal-inicio').classList.add('hidden')">Cancelar</button>
+  </div>
+</div>
+
+<div class="conquista hidden" id="conquista-overlay">
+  <div class="conquista-box">
+    <div class="conquista-badge" id="c-badge"></div>
+    <div class="conquista-titulo" id="c-titulo"></div>
+    <div class="conquista-sub" id="c-sub"></div>
+    <button class="conquista-btn" onclick="fecharConquista()">Continuar</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const DIAS = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const hoje = new Date();
+document.getElementById('header-date').textContent = `${DIAS[hoje.getDay()]}, ${hoje.getDate()} de ${MESES[hoje.getMonth()]}`;
+
+const TOTAL_SEMANAS = 12;
+const FICHAS = [
+  { id:1, nome:'Peito + Core', label:'PC', grupos:[
+    { nome:'Peito', exercicios:[
+      {id:1,nome:'Supino reto',series:4,reps:'6–8',tipo:'peso'},
+      {id:2,nome:'Supino inclinado',series:3,reps:'8',tipo:'peso'},
+      {id:3,nome:'Supino com halter',series:3,reps:'8',tipo:'peso'},
+      {id:4,nome:'Crossover / peck deck',series:3,reps:'10',tipo:'peso'},
+    ]},
+    { nome:'Core', exercicios:[
+      {id:5,nome:'Prancha',series:3,reps:'',tipo:'tempo'},
+      {id:6,nome:'Abdominal infra',series:3,reps:'',tipo:'livre'},
+    ]},
+  ]},
+  { id:2, nome:'Bíceps + Tríceps', label:'BT', grupos:[
+    { nome:'Bíceps', exercicios:[
+      {id:7,nome:'Rosca direta',series:3,reps:'10',tipo:'peso'},
+      {id:8,nome:'Rosca martelo',series:3,reps:'10',tipo:'peso'},
+      {id:9,nome:'Rosca concentrada',series:3,reps:'10',tipo:'peso'},
+      {id:10,nome:'Rosca inversa',series:3,reps:'12',tipo:'peso'},
+    ]},
+    { nome:'Tríceps', exercicios:[
+      {id:11,nome:'Corda',series:3,reps:'10',tipo:'peso'},
+      {id:12,nome:'Barra (pushdown)',series:3,reps:'10',tipo:'peso'},
+      {id:13,nome:'Tríceps testa',series:3,reps:'8',tipo:'peso'},
+      {id:14,nome:'Mergulho máquina',series:3,reps:'',tipo:'peso'},
+    ]},
+  ]},
+  { id:3, nome:'Costas + Ombro + Core', label:'CO', grupos:[
+    { nome:'Costas', exercicios:[
+      {id:15,nome:'Puxada na polia',series:4,reps:'8–10',tipo:'peso'},
+      {id:16,nome:'Remada máquina',series:3,reps:'8',tipo:'peso'},
+      {id:17,nome:'Remada unilateral',series:3,reps:'8',tipo:'peso'},
+      {id:18,nome:'Pulldown braço esticado',series:3,reps:'10',tipo:'peso'},
+    ]},
+    { nome:'Ombro', exercicios:[
+      {id:19,nome:'Desenvolvimento',series:3,reps:'8',tipo:'peso'},
+      {id:20,nome:'Elevação lateral',series:3,reps:'12',tipo:'peso'},
+      {id:21,nome:'Elevação frontal',series:3,reps:'10',tipo:'peso'},
+      {id:22,nome:'Posterior de ombro',series:3,reps:'12',tipo:'peso'},
+    ]},
+    { nome:'Core', exercicios:[
+      {id:23,nome:'Prancha lateral',series:3,reps:'',tipo:'tempo'},
+      {id:24,nome:'Abdominal oblíquo',series:3,reps:'',tipo:'livre'},
+    ]},
+  ]},
+  { id:4, nome:'Perna', label:'PE', grupos:[
+    { nome:'Perna', exercicios:[
+      {id:25,nome:'Agachamento',series:4,reps:'6',tipo:'peso'},
+      {id:26,nome:'Levantamento terra / stiff',series:4,reps:'6–8',tipo:'peso'},
+      {id:27,nome:'Máquina adutora',series:4,reps:'12',tipo:'peso'},
+      {id:28,nome:'Agachamento c/ salto / box jump',series:3,reps:'6',tipo:'livre'},
+    ]},
+  ]},
+  { id:5, nome:'Costas leve + Pegada + Core', label:'CG', grupos:[
+    { nome:'Costas leve', exercicios:[
+      {id:29,nome:'Puxada leve',series:3,reps:'',tipo:'peso'},
+      {id:30,nome:'Remada leve',series:3,reps:'',tipo:'peso'},
+    ]},
+    { nome:'Pegada', exercicios:[
+      {id:31,nome:'Segurar halter pesado',series:3,reps:'',tipo:'tempo'},
+      {id:32,nome:'Pinch grip (anilha)',series:3,reps:'',tipo:'tempo'},
+      {id:33,nome:'Wrist roller',series:3,reps:'',tipo:'livre'},
+    ]},
+    { nome:'Core', exercicios:[
+      {id:34,nome:'Prancha',series:3,reps:'',tipo:'tempo'},
+      {id:35,nome:'Abdominal infra',series:3,reps:'',tipo:'livre'},
+    ]},
+  ]},
+];
+
+let state = JSON.parse(localStorage.getItem('treino_v5') || 'null') || {
+  programa: null,
+  cicloAtual: [],
+  historico: [],
+  ciclos: 0,
+};
+
+function save() {
+  try { localStorage.setItem('treino_v5', JSON.stringify(state)); } catch(e) {}
+}
+
+function getAllEx(ficha) {
+  return ficha.grupos.flatMap(g => g.exercicios);
+}
+
+function getPR(exId) {
+  let max = 0;
+  state.historico.forEach(h => (h.pesos[exId] || []).forEach(p => {
+    const v = parseFloat(p);
+    if (!isNaN(v) && v > max) max = v;
+  }));
+  return max;
+}
+
+function todayStr() {
+  return hoje.toISOString().split('T')[0];
+}
+
+function formatDate(str) {
+  const d = new Date(str + 'T12:00:00');
+  return `${DIAS[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]}`;
+}
+
+function semanaAtual() {
+  if (!state.programa) return null;
+  const inicio = new Date(state.programa.inicio + 'T12:00:00');
+  const diff = Math.floor((hoje - inicio) / (1000 * 60 * 60 * 24));
+  const sem = Math.floor(diff / 7) + 1;
+  return Math.min(sem, TOTAL_SEMANAS);
+}
+
+function fichasDaSemana(n) {
+  if (!state.programa) return [];
+  return state.programa.semanas[n - 1] || [];
+}
+
+function semanaCompleta(n) {
+  return fichasDaSemana(n).length >= FICHAS.length;
+}
+
+function badgeLabel(ficha) {
+  return ficha.label || ficha.nome.split('+').map(p => p.trim()[0]).join('').slice(0, 2).toUpperCase();
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  const idx = ['escolha','programa','ficha','historico'].indexOf(name);
+  if (idx >= 0) document.querySelectorAll('.tab')[idx].classList.add('active');
+  if (name === 'escolha') renderEscolha();
+  if (name === 'programa') renderPrograma();
+  if (name === 'ficha') renderFichas();
+  if (name === 'historico') renderHistorico();
+}
+
+function iniciarPrograma() {
+  state.programa = { inicio: todayStr(), semanas: Array.from({ length: TOTAL_SEMANAS }, () => []) };
+  save();
+  document.getElementById('modal-inicio').classList.add('hidden');
+  showScreen('programa');
+}
+
+function renderPrograma() {
+  const el = document.getElementById('screen-programa');
+  if (!state.programa) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="conquista-badge" style="margin:0 auto 14px">12W</div>
+        <h3>Programa de 12 semanas</h3>
+        <p>Organize as 5 fichas da semana, acompanhe a consistência e registre sua evolução com mais clareza.</p>
+        <button class="save-btn" style="margin-top:18px" onclick="document.getElementById('modal-inicio').classList.remove('hidden')">Iniciar programa</button>
+      </div>`;
+    return;
+  }
+
+  const semAtual = semanaAtual();
+  const semanasCompletas = Array.from({ length: TOTAL_SEMANAS }, (_, i) => semanaCompleta(i + 1));
+  const totalCompletas = semanasCompletas.filter(Boolean).length;
+  const pct = Math.round((totalCompletas / TOTAL_SEMANAS) * 100);
+  const inicio = new Date(state.programa.inicio + 'T12:00:00');
+  const fim = new Date(inicio);
+  fim.setDate(fim.getDate() + 84);
+  const fimStr = `${fim.getDate()} de ${MESES[fim.getMonth()]}`;
+  const programaVencido = totalCompletas === TOTAL_SEMANAS;
+
+  let html = `
+    <div class="prog-hero">
+      <div class="program-row">
+        <div class="program-row-text">
+          <div class="prog-hero-label">Programa ativo</div>
+          <div class="prog-hero-title">${programaVencido ? 'Programa concluído' : '12 semanas'}</div>
+          <div class="prog-hero-sub">Início em ${formatDate(state.programa.inicio)} · término previsto em ${fimStr}</div>
+        </div>
+        <div class="hero-badge">${programaVencido ? 'OK' : '12W'}</div>
+      </div>
+      <div class="prog-stats">
+        <div class="prog-stat"><div class="prog-stat-val">${semAtual}</div><div class="prog-stat-label">Semana atual</div></div>
+        <div class="prog-stat"><div class="prog-stat-val">${totalCompletas}</div><div class="prog-stat-label">Semanas fechadas</div></div>
+        <div class="prog-stat"><div class="prog-stat-val">${state.historico.length}</div><div class="prog-stat-label">Treinos salvos</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="prog-bar-header">
+        <span class="prog-bar-label">Progresso geral</span>
+        <span class="prog-bar-pct">${pct}%</span>
+      </div>
+      <div class="prog-bar-track"><div class="prog-bar-fill" style="width:${pct}%"></div></div>
+    </div>
+
+    <div class="panel">
+      <p class="section-title" style="margin-top:0">Semanas</p>
+      <div class="semanas-grid">`;
+
+  for (let i = 1; i <= TOTAL_SEMANAS; i++) {
+    const completa = semanasCompletas[i - 1];
+    const isAtual = i === semAtual;
+    const futura = i > semAtual;
+    let cls = 'semana-box';
+    if (completa) cls += ' completa';
+    else if (isAtual) cls += ' atual';
+    else if (futura) cls += ' futura';
+    html += `<div class="${cls}" onclick="mostrarDetalhesSemana(${i})" title="Semana ${i}"><span>${completa ? '✓' : i}</span></div>`;
+  }
+
+  html += `</div></div>`;
+
+  if (semAtual && semAtual <= TOTAL_SEMANAS) {
+    const feitasAgora = fichasDaSemana(semAtual);
+    html += `<div class="panel"><p class="section-title" style="margin-top:0">Semana ${semAtual}</p>`;
+    FICHAS.forEach(f => {
+      const feita = feitasAgora.includes(f.id);
+      html += `
+        <div class="program-row">
+          <div class="mini-badge">${badgeLabel(f)}</div>
+          <div class="program-row-text">
+            <div class="program-row-title">${f.nome}</div>
+            <div class="program-row-sub">${getAllEx(f).length} exercícios</div>
+          </div>
+          <span class="${feita ? 'done-tag' : 'ghost-pill'}">${feita ? 'feito' : 'pendente'}</span>
+        </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (programaVencido) {
+    html += `<button class="save-btn" style="margin-top:6px" onclick="reiniciarPrograma()">Reiniciar programa</button>`;
+  }
+
+  el.innerHTML = html;
+}
+
+function reiniciarPrograma() {
+  state.programa = { inicio: todayStr(), semanas: Array.from({ length: TOTAL_SEMANAS }, () => []) };
+  state.ciclos = 0;
+  state.cicloAtual = [];
+  save();
+  renderPrograma();
+  showToast('Novo programa iniciado');
+}
+
+function mostrarDetalhesSemana(n) {
+  const feitas = fichasDaSemana(n);
+  showToast(`Semana ${n}: ${feitas.length}/${FICHAS.length} fichas`);
+}
+
+function renderEscolha() {
+  const el = document.getElementById('screen-escolha');
+  const cicloCompleto = state.cicloAtual.length === FICHAS.length;
+  const dotsHtml = FICHAS.map(f => {
+    const done = state.cicloAtual.includes(f.id);
+    return `<div class="ciclo-dot ${done ? 'done' : ''}"></div>`;
+  }).join('');
+
+  let html = `
+    <div class="escolha-header">
+      <h2>Treino do dia</h2>
+      <p>Escolha a ficha disponível e registre as cargas para acompanhar sua evolução.</p>
+    </div>
+
+    <div class="ciclo-bar">
+      <div class="ciclo-label">Ciclo atual · ${state.cicloAtual.length}/${FICHAS.length} concluídos</div>
+      <div class="ciclo-dots">${dotsHtml}</div>
+    </div>`;
+
+  if (cicloCompleto) {
+    html += `<div class="ciclo-completo-banner"><p>Ciclo completo</p><span>O próximo treino inicia um novo ciclo automaticamente.</span></div>`;
+  }
+
+  FICHAS.forEach(f => {
+    const feito = state.cicloAtual.includes(f.id);
+    const bloqueado = feito && !cicloCompleto;
+    const lastSession = [...state.historico].reverse().find(h => h.fichaId === f.id);
+    const lastInfo = lastSession ? `Último registro em ${formatDate(lastSession.data)}` : 'Sem registro anterior';
+    html += `
+      <button class="ficha-btn" ${bloqueado ? 'disabled' : ''} onclick="iniciarTreino(${f.id})">
+        <div class="ficha-top">
+          <div class="ficha-badge">${badgeLabel(f)}</div>
+          ${feito ? '<span class="done-tag">feito</span>' : '<span class="ghost-pill">disponível</span>'}
+        </div>
+        <div class="ficha-text" style="margin-top:12px">
+          <div class="fb-nome">${f.nome}</div>
+          <div class="fb-info">${getAllEx(f).length} exercícios · ${lastInfo}</div>
+        </div>
+      </button>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function iniciarTreino(fichaId) {
+  const ficha = FICHAS.find(f => f.id === fichaId);
+  const el = document.getElementById('screen-treino');
+  const lastSession = [...state.historico].reverse().find(h => h.fichaId === fichaId);
+
+  let html = `<button class="back-btn" onclick="showScreen('escolha')">← Voltar</button>`;
+  html += `
+    <div class="treino-head card">
+      <div class="treino-topbar">
+        <div class="program-row-text">
+          <div class="section-title" style="margin:0 0 8px;padding-left:0">Ficha selecionada</div>
+          <div class="program-row-title">${ficha.nome}</div>
+          <div class="program-row-sub">${lastSession ? 'Último treino em ' + formatDate(lastSession.data) : 'Primeiro registro desta ficha'}</div>
+        </div>
+        <div class="ficha-badge">${badgeLabel(ficha)}</div>
+      </div>
+    </div>`;
+
+  ficha.grupos.forEach(grupo => {
+    html += `<div class="group-sep">${grupo.nome}</div>`;
+    grupo.exercicios.forEach(ex => {
+      const pr = getPR(ex.id);
+      const lastP = lastSession ? (lastSession.pesos[ex.id] || []) : [];
+      html += `
+        <div class="exercise-row">
+          <div class="treino-topbar">
+            <div>
+              <div class="exercise-name">${ex.nome}</div>
+              <div class="exercise-meta">${ex.series} séries${ex.reps ? ' × ' + ex.reps + ' reps' : ''}</div>
+            </div>
+            ${pr > 0 ? `<span class="pr-badge">PR ${pr} kg</span>` : ''}
+          </div>
+          <div class="weight-row">`;
+      for (let i = 0; i < ex.series; i++) {
+        const prev = lastP[i] || '';
+        html += `
+          <div class="set-group">
+            <div class="set-label">S${i + 1}</div>
+            <input class="set-input" type="${ex.tipo === 'peso' ? 'number' : 'text'}" step="0.5" placeholder="${ex.tipo === 'peso' ? (prev ? prev + 'kg' : 'kg') : (prev || '–')}" id="p_${ex.id}_${i}">
+          </div>`;
+      }
+      html += `</div></div>`;
+    });
+  });
+
+  html += `<button class="save-btn" onclick="salvarTreino(${fichaId})">Salvar treino</button>`;
+  el.innerHTML = html;
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-treino').classList.add('active');
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.remove('active');
+    if (i === 0) t.classList.add('active');
+  });
+}
+
+function salvarTreino(fichaId) {
+  const ficha = FICHAS.find(f => f.id === fichaId);
+  const todos = getAllEx(ficha);
+  const pesos = {};
+  let algum = false;
+
+  todos.forEach(ex => {
+    pesos[ex.id] = [];
+    for (let i = 0; i < ex.series; i++) {
+      const v = document.getElementById(`p_${ex.id}_${i}`)?.value || '';
+      pesos[ex.id].push(v);
+      if (v) algum = true;
+    }
+  });
+
+  if (!algum) {
+    showToast('Preencha ao menos um campo');
+    return;
+  }
+
+  const ts = todayStr();
+  const idx = state.historico.findIndex(h => h.data === ts && h.fichaId === fichaId);
+  if (idx >= 0) state.historico[idx].pesos = pesos;
+  else state.historico.push({ data: ts, fichaId, pesos });
+
+  const cicloCompleto = state.cicloAtual.length === FICHAS.length;
+  if (cicloCompleto) {
+    state.ciclos++;
+    state.cicloAtual = [fichaId];
+  } else if (!state.cicloAtual.includes(fichaId)) {
+    state.cicloAtual.push(fichaId);
+  }
+
+  if (state.programa) {
+    const sem = semanaAtual();
+    if (sem && sem <= TOTAL_SEMANAS) {
+      const semArr = state.programa.semanas[sem - 1];
+      if (!semArr.includes(fichaId)) semArr.push(fichaId);
+      if (semArr.length === FICHAS.length) {
+        save();
+        mostrarConquista(sem);
+        return;
+      }
+    }
+  }
+
+  save();
+  showToast('Treino salvo');
+  setTimeout(() => showScreen('escolha'), 800);
+}
+
+function mostrarConquista(semana) {
+  const total = Array.from({ length: TOTAL_SEMANAS }, (_, i) => semanaCompleta(i + 1)).filter(Boolean).length;
+  const programaVencido = total === TOTAL_SEMANAS;
+  document.getElementById('c-badge').textContent = programaVencido ? 'OK' : `S${semana}`;
+  document.getElementById('c-titulo').textContent = programaVencido ? 'Programa concluído' : `Semana ${semana} concluída`;
+  document.getElementById('c-sub').textContent = programaVencido
+    ? 'Você fechou as 12 semanas do programa. Excelente consistência.'
+    : `Todas as fichas da semana foram concluídas. Restam ${TOTAL_SEMANAS - semana} semanas para fechar o programa.`;
+  document.getElementById('conquista-overlay').classList.remove('hidden');
+}
+
+function fecharConquista() {
+  document.getElementById('conquista-overlay').classList.add('hidden');
+  showScreen('escolha');
+}
+
+function renderFichas() {
+  const el = document.getElementById('screen-ficha');
+  let html = `
+    <div class="screen-title">
+      <h2>Fichas</h2>
+      <p>Visão rápida de todas as divisões disponíveis no ciclo.</p>
+    </div>`;
+
+  FICHAS.forEach(f => {
+    const feito = state.cicloAtual.includes(f.id);
+    html += `
+      <div class="ficha-card ${feito ? 'done' : ''}">
+        <div class="ficha-card-top">
+          <div class="ficha-badge">${badgeLabel(f)}</div>
+          ${feito ? '<span class="done-tag">feito neste ciclo</span>' : '<span class="ghost-pill">pendente</span>'}
+        </div>
+        <div style="margin-top:12px;font-size:16px;font-weight:700;color:var(--text)">${f.nome}</div>
+        <div style="margin-top:4px" class="subtle-text">${getAllEx(f).length} exercícios distribuídos por grupo</div>
+      </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function renderHistorico() {
+  const el = document.getElementById('screen-historico');
+  if (!state.historico.length) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="conquista-badge" style="margin:0 auto 14px">LOG</div>
+        <h3>Nenhum treino salvo</h3>
+        <p>Assim que você registrar os primeiros treinos, o histórico vai aparecer aqui com as sessões recentes.</p>
+      </div>`;
+    return;
+  }
+
+  const semCompletas = state.programa ? Array.from({ length: TOTAL_SEMANAS }, (_, i) => semanaCompleta(i + 1)).filter(Boolean).length : 0;
+  const sorted = [...state.historico].sort((a, b) => b.data.localeCompare(a.data));
+  let html = `
+    <div class="screen-title">
+      <h2>Histórico</h2>
+      <p>Resumo das últimas sessões registradas.</p>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-label">Treinos feitos</div>
+        <div class="metric-value">${state.historico.length}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Semanas completas</div>
+        <div class="metric-value">${semCompletas}/12</div>
+      </div>
+    </div>
+
+    <p class="section-title">Sessões recentes</p>`;
+
+  sorted.slice(0, 15).forEach(h => {
+    const ficha = FICHAS.find(f => f.id === h.fichaId);
+    if (!ficha) return;
+    html += `
+      <div class="history-item">
+        <div class="ficha-card-top">
+          <div>
+            <div class="history-date">${formatDate(h.data)}</div>
+            <div class="history-title">${ficha.nome}</div>
+          </div>
+          <div class="mini-badge">${badgeLabel(ficha)}</div>
+        </div>
+        <div class="history-exs">`;
+    getAllEx(ficha).forEach(ex => {
+      const ps = (h.pesos[ex.id] || []).filter(p => p);
+      if (ps.length) {
+        html += `<div class="history-ex">${ex.nome.split(' ')[0]}: <span>${ps.join('/')} ${ex.tipo === 'peso' ? 'kg' : ''}</span></div>`;
+      }
+    });
+    html += `</div></div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.style.opacity = '0', 2200);
+}
+
+renderEscolha();
+</script>
+</body>
+</html>
